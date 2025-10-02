@@ -7,6 +7,7 @@ public class MyRectangle extends JPanel {
     public int value;
     public int width = 10;
     public int height;
+    public Color colour = Color.BLACK;
 
     public MyRectangle(int x, int y, int value) {
         this.x = x;
@@ -21,7 +22,6 @@ public class MyRectangle extends JPanel {
 
     public void paint(Graphics g){
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(Color.red);
         g2d.drawRect(x, y, width, height);
     }
 
