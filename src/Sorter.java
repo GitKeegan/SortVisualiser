@@ -1,11 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 public class Sorter {
     private final List<MyRectangle> rectangles;
     private final Visualiser.DrawPanel drawPanel;
     private Timer timer;
+    private final SoundHelper soundHelper = new SoundHelper();
+
+    ExecutorService soundExecutor = Executors.newFixedThreadPool(5);
 
     public Sorter(List<MyRectangle> rectangles, Visualiser.DrawPanel drawPanel) {
         this.rectangles = rectangles;
@@ -18,7 +23,7 @@ public class Sorter {
         final int[] j = {0};
         final boolean[] swapped = {false};
 
-        Timer timer = new Timer(5, null); // runs every 50ms
+        timer = new Timer(5, null); // runs every 50ms
         timer.addActionListener(e1 -> {
             for (MyRectangle r : rectangles) {
                 r.colour = Color.BLACK;
@@ -27,6 +32,7 @@ public class Sorter {
 
             if (i[0] < rectangles.size() - 1) {
                 if (j[0] < rectangles.size() - i[0] - 1) {
+
                     if (rectangles.get(j[0]).value > rectangles.get(j[0] + 1).value) {
                         //Set the colour of the currently viewed rectangles
                         rectangles.get(j[0]).colour = Color.RED;
@@ -46,10 +52,13 @@ public class Sorter {
 
 
                     }
+                    soundExecutor.submit(() -> SoundHelper.playTone(rectangles.get(j[0]).value, 5));
                     j[0]++;
-                } else {
+                }
+                else {
                     if (!swapped[0]) {
                         timer.stop(); // stop if no swaps in this pass
+                        playCompletionSweep();
                     }
                     j[0] = 0;
                     i[0]++;
@@ -58,9 +67,10 @@ public class Sorter {
                 drawPanel.repaint();
             } else {
                 timer.stop(); // fully sorted
+                playCompletionSweep();
+
             }
         });
-
         timer.start();
     }
 
@@ -69,7 +79,7 @@ public class Sorter {
         final int[] j = {1};        // inner loop index
         final int[] min = {0};      // index of current minimum
 
-        Timer timer = new Timer(5, null);
+        timer = new Timer(5, null);
         timer.addActionListener(e -> {
             // Reset all colors each step
             for (MyRectangle r : rectangles) {
@@ -81,7 +91,8 @@ public class Sorter {
             if (i[0] < n - 1) {
                 // Highlight the current range
                 rectangles.get(i[0]).colour = java.awt.Color.GREEN; // sorted part
-                rectangles.get(min[0]).colour = java.awt.Color.RED; // current min
+                rectangles.get(min[0]).colour = java.awt.Color.RED;// current min
+                soundExecutor.submit(() -> SoundHelper.playTone(rectangles.get(min[0]).value, 5));
                 if (j[0] < n) {
                     rectangles.get(j[0]).colour = java.awt.Color.BLUE; // currently checking
 
@@ -113,6 +124,7 @@ public class Sorter {
                 rectangles.get(n - 1).colour = java.awt.Color.GREEN;
                 drawPanel.repaint();
                 timer.stop();
+                playCompletionSweep();
             }
         });
 
@@ -144,6 +156,7 @@ public class Sorter {
                     rectangles.set(j[0] + 1, rectangles.get(j[0]));
                     rectangles.get(j[0] + 1).x = (j[0] + 1) * 10 + 10; // update x
                     rectangles.get(j[0]).colour = Color.BLUE;
+                    soundExecutor.submit(() -> SoundHelper.playTone(rectangles.get(j[0]).value, 5));
                     j[0]--;
                 } else {
                     // insert the key
@@ -154,11 +167,48 @@ public class Sorter {
                 }
                 drawPanel.repaint();
             } else {
+                playCompletionSweep();
                 timer.stop(); // fully sorted
+
             }
         });
 
         timer.start();
+
+
     }
+    private void playCompletionSweep() {
+        final int[] sweepIndex = {0};
+
+        // Create a new, slower timer just for the sweep effect (e.g., 25ms per rectangle)
+        Timer sweepTimer = new Timer(10, null);
+
+        sweepTimer.addActionListener(e -> {
+            int index = sweepIndex[0];
+            int n = rectangles.size();
+
+            if (index < n) {
+                MyRectangle r = rectangles.get(index);
+
+                // 1. Set the color to GREEN
+                r.colour = Color.GREEN;
+
+                // 2. Play the tone corresponding to the rectangle's value
+                // Use a longer duration than the rapid comparison beeps (e.g., 50ms)
+                soundExecutor.submit(() -> SoundHelper.playTone(r.value, 50));
+
+                // 3. Redraw the panel
+                drawPanel.repaint();
+
+                sweepIndex[0]++;
+            } else {
+                sweepTimer.stop(); // The sweep is complete
+            }
+        });
+
+        sweepTimer.start();
+    }
+
+
 
 }
