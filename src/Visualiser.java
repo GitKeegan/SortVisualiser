@@ -8,6 +8,8 @@ import java.util.List;
 public class Visualiser extends JPanel implements ActionListener{
     final private DrawPanel drawPanel;
 
+    final private JComboBox sortSelector;
+
     int position = 10;
     public Visualiser(){
         JFrame frame = new JFrame("Visualiser");
@@ -26,8 +28,15 @@ public class Visualiser extends JPanel implements ActionListener{
         drawPanel = new DrawPanel();
         drawPanel.setPreferredSize(new Dimension(800, 600));
 
+        sortSelector = new JComboBox();
+        sortSelector.addItem("BubbleSort");
+        sortSelector.addItem("SelectionSort");
+        sortSelector.addItem("InsertionSort");
+
         frame.add(buttonPanel, BorderLayout.WEST);
         frame.add(drawPanel, BorderLayout.CENTER);
+
+        frame.add(sortSelector, BorderLayout.SOUTH);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
@@ -50,54 +59,17 @@ public class Visualiser extends JPanel implements ActionListener{
         List<MyRectangle> rectangles = drawPanel.getRectangles();
 
         if (command.equals("Sort")) {
-
-            final int[] i = {0};
-            final int[] j = {0};
-            final boolean[] swapped = {false};
-
-            Timer timer = new Timer(5, null); // runs every 50ms
-            timer.addActionListener(e1 -> {
-                for (MyRectangle r : rectangles) {
-                    r.colour = Color.BLACK;
-                }
-
-
-                if (i[0] < rectangles.size() - 1) {
-                    if (j[0] < rectangles.size() - i[0] - 1) {
-                        if (rectangles.get(j[0]).value > rectangles.get(j[0] + 1).value) {
-                            rectangles.get(j[0]).colour = Color.RED;
-                            rectangles.get(j[0] + 1).colour = Color.RED;
-
-                            // swap x positions
-                            int tempX = rectangles.get(j[0]).x;
-                            rectangles.get(j[0]).x = rectangles.get(j[0] + 1).x;
-                            rectangles.get(j[0] + 1).x = tempX;
-
-                            // swap rectangles in list
-                            MyRectangle temp = rectangles.get(j[0]);
-                            rectangles.set(j[0], rectangles.get(j[0] + 1));
-                            rectangles.set(j[0] + 1, temp);
-
-                            swapped[0] = true;
-
-
-                        }
-                        j[0]++;
-                    } else {
-                        if (!swapped[0]) {
-                            timer.stop(); // stop if no swaps in this pass
-                        }
-                        j[0] = 0;
-                        i[0]++;
-                        swapped[0] = false;
-                    }
-                    drawPanel.repaint();
-                } else {
-                    timer.stop(); // fully sorted
-                }
-            });
-
-            timer.start();
+            Sorter sorter = new Sorter(rectangles, drawPanel);
+            String sortSelected = sortSelector.getSelectedItem().toString();
+            if (sortSelected.equals("BubbleSort")) {
+                sorter.bubbleSort();
+            }
+            else if (sortSelected.equals("SelectionSort")) {
+                sorter.selectionSort();
+            }
+            else if (sortSelected.equals("InsertionSort")) {
+                sorter.insertionSort();
+            }
         }
         else if (command.equals("Reset")){
             drawPanel.clear();
@@ -110,7 +82,7 @@ public class Visualiser extends JPanel implements ActionListener{
 
     }
 
-    static class DrawPanel extends JPanel{
+    public static class DrawPanel extends JPanel{
         private final List<MyRectangle> myRectangles = new ArrayList<>();
 
         public void addRectangle(MyRectangle myRectangle){
