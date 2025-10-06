@@ -9,16 +9,20 @@ public class Sorter {
     private final Visualiser.DrawPanel drawPanel;
     private Timer timer;
     private final SoundHelper soundHelper = new SoundHelper();
+    private final Visualiser visualiser;
 
     ExecutorService soundExecutor = Executors.newFixedThreadPool(5);
 
-    public Sorter(List<MyRectangle> rectangles, Visualiser.DrawPanel drawPanel) {
+    public Sorter(List<MyRectangle> rectangles, Visualiser.DrawPanel drawPanel, Visualiser visualiser) {
         this.rectangles = rectangles;
         this.drawPanel = drawPanel;
+        this.visualiser = visualiser;
     }
 
 
     public void bubbleSort(){
+        visualiser.setSortingStatus(true);
+
         final int[] i = {0};
         final int[] j = {0};
         final boolean[] swapped = {false};
@@ -26,11 +30,17 @@ public class Sorter {
         timer = new Timer(5, null); // runs every 50ms
         timer.addActionListener(e1 -> {
             for (MyRectangle r : rectangles) {
-                r.colour = Color.BLACK;
+                r.colour = Color.WHITE;
             }
 
 
             if (i[0] < rectangles.size() - 1) {
+                if (visualiser.shouldStop){
+                    timer.stop();
+                    visualiser.setSortingStatus(false);
+                    visualiser.shouldStop = false;
+                }
+
                 if (j[0] < rectangles.size() - i[0] - 1) {
 
                     if (rectangles.get(j[0]).value > rectangles.get(j[0] + 1).value) {
@@ -75,6 +85,8 @@ public class Sorter {
     }
 
     public void selectionSort() {
+        visualiser.setSortingStatus(true);
+
         final int[] i = {0};        // outer loop index
         final int[] j = {1};        // inner loop index
         final int[] min = {0};      // index of current minimum
@@ -83,12 +95,18 @@ public class Sorter {
         timer.addActionListener(e -> {
             // Reset all colors each step
             for (MyRectangle r : rectangles) {
-                r.colour = java.awt.Color.BLACK;
+                r.colour = java.awt.Color.WHITE;
             }
 
             int n = rectangles.size();
 
             if (i[0] < n - 1) {
+                if (visualiser.shouldStop){
+                    timer.stop();
+                    visualiser.setSortingStatus(false);
+                    visualiser.shouldStop = false;
+                }
+
                 // Highlight the current range
                 rectangles.get(i[0]).colour = java.awt.Color.GREEN; // sorted part
                 rectangles.get(min[0]).colour = java.awt.Color.RED;// current min
@@ -132,6 +150,8 @@ public class Sorter {
     }
 
     public void insertionSort() {
+        visualiser.setSortingStatus(true);
+
         final int[] i = {1};   // index of the "key" we are inserting
         final int[] j = {0};   // index for shifting
         final MyRectangle[] key = {null};
@@ -140,7 +160,7 @@ public class Sorter {
         timer.addActionListener(e -> {
             // Reset colours each step
             for (MyRectangle r : rectangles) {
-                r.colour = Color.BLACK;
+                r.colour = Color.WHITE;
             }
 
             int n = rectangles.size();
@@ -166,7 +186,15 @@ public class Sorter {
                     i[0]++;
                 }
                 drawPanel.repaint();
-            } else {
+
+                if (visualiser.shouldStop){
+                    timer.stop();
+                    visualiser.setSortingStatus(false);
+                    visualiser.shouldStop = false;
+                }
+            }
+
+            else {
                 playCompletionSweep();
                 timer.stop(); // fully sorted
 
@@ -203,12 +231,11 @@ public class Sorter {
                 sweepIndex[0]++;
             } else {
                 sweepTimer.stop(); // The sweep is complete
+                visualiser.setSortingStatus(false);
             }
         });
 
         sweepTimer.start();
     }
-
-
 
 }

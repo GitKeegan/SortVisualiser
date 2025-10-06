@@ -7,7 +7,7 @@ public class MyRectangle extends JPanel {
     public int value;
     public int width = 10;
     public int height;
-    public Color colour = Color.BLACK;
+    public Color colour = Color.WHITE;
 
     public MyRectangle(int x, int y, int value) {
         this.x = x;

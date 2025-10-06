@@ -3,7 +3,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class SoundHelper {
+public class SoundHelper{
     private static Synthesizer synth;
     private static final int MIN_NOTE = 40; // Low E
     private static final int MAX_NOTE = 80; // High G
