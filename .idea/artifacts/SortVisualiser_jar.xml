@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SortVisualiser:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SortVisualiser_jar</output-path>
+    <root id="archive" name="SortVisualiser.jar">
+      <element id="module-output" name="SortVisualiser" />
+    </root>
+  </artifact>
+</component>
