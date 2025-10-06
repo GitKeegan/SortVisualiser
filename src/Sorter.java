@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -10,6 +11,7 @@ public class Sorter {
     private Timer timer;
     private final SoundHelper soundHelper = new SoundHelper();
     private final Visualiser visualiser;
+    long time;
 
     ExecutorService soundExecutor = Executors.newFixedThreadPool(5);
 
@@ -21,6 +23,7 @@ public class Sorter {
 
 
     public void bubbleSort(){
+        time = System.currentTimeMillis();
         visualiser.setSortingStatus(true);
 
         final int[] i = {0};
@@ -85,6 +88,7 @@ public class Sorter {
     }
 
     public void selectionSort() {
+        time = System.currentTimeMillis();
         visualiser.setSortingStatus(true);
 
         final int[] i = {0};        // outer loop index
@@ -150,6 +154,7 @@ public class Sorter {
     }
 
     public void insertionSort() {
+        time = System.currentTimeMillis();
         visualiser.setSortingStatus(true);
 
         final int[] i = {1};   // index of the "key" we are inserting
@@ -205,7 +210,53 @@ public class Sorter {
 
 
     }
+
+    public void bogoSort() {
+        time = System.currentTimeMillis();
+        visualiser.setSortingStatus(true);
+
+        timer = new Timer(5, null);
+        timer.addActionListener(e -> {
+           Collections.shuffle(rectangles);
+           drawPanel.repaint();
+
+           for (int i = 0; i < rectangles.size(); i++) {
+               rectangles.get(i).x = 10 + 10 * i;
+           }
+           if (isSorted()){
+               drawPanel.repaint();
+               playCompletionSweep();
+               timer.stop();
+           }
+           if (visualiser.shouldStop){
+               timer.stop();
+               visualiser.setSortingStatus(false);
+               visualiser.shouldStop = false;
+           }
+        });
+        timer.start();
+
+    }
+
+    private boolean isSorted() {
+        for (int i = 0; i < rectangles.size() - 1; i++) {
+            if (rectangles.get(i).value > rectangles.get(i + 1).value) {
+                int finalI = i;
+                soundExecutor.submit(() -> SoundHelper.playTone(rectangles.get(finalI).value, 5));
+                soundExecutor.submit(() -> SoundHelper.playTone(rectangles.get(finalI + 1).value, 5));
+
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void playCompletionSweep() {
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - time;
+        visualiser.elapsedTimeField.setText(elapsedTime + "ms");
+
+
         final int[] sweepIndex = {0};
 
         // Create a new, slower timer just for the sweep effect (e.g., 25ms per rectangle)

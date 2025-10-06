@@ -7,11 +7,11 @@ import java.util.List;
 
 public class Visualiser extends JPanel implements ActionListener{
     final private DrawPanel drawPanel;
-
     final private JComboBox sortSelector;
-
     private boolean isSorting;
     public volatile boolean shouldStop = false;
+    private final JTextField rectangleField;
+    public JLabel elapsedTimeField = new JLabel("");
 
     public void setSortingStatus(boolean state){
         isSorting = state;
@@ -30,11 +30,14 @@ public class Visualiser extends JPanel implements ActionListener{
         JButton stopButton = new JButton("Stop");
         stopButton.addActionListener(this);
 
+        rectangleField = new JTextField("70", 5);
+
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(0,1));
         buttonPanel.add(sortButton);
         buttonPanel.add(addButton);
         buttonPanel.add(stopButton);
+        buttonPanel.add(rectangleField);
         buttonPanel.setBackground(Color.BLACK);
 
         drawPanel = new DrawPanel();
@@ -45,11 +48,18 @@ public class Visualiser extends JPanel implements ActionListener{
         sortSelector.addItem("BubbleSort");
         sortSelector.addItem("SelectionSort");
         sortSelector.addItem("InsertionSort");
+        sortSelector.addItem("BogoSort");
+
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        timePanel.setBackground(Color.BLACK);
+        timePanel.add(elapsedTimeField);
+        elapsedTimeField.setForeground(Color.WHITE);
 
         frame.add(buttonPanel, BorderLayout.WEST);
         frame.add(drawPanel, BorderLayout.CENTER);
-
         frame.add(sortSelector, BorderLayout.SOUTH);
+        frame.add(timePanel, BorderLayout.NORTH);
 
         frame.getContentPane().setBackground(Color.BLACK);
 
@@ -88,12 +98,30 @@ public class Visualiser extends JPanel implements ActionListener{
             else if (sortSelected.equals("InsertionSort")) {
                 sorter.insertionSort();
             }
+            else if (sortSelected.equals("BogoSort")) {
+                sorter.bogoSort();
+            }
 
         }
         else if (command.equals("Reset") && !isSorting) {
+            elapsedTimeField.setText("");
             drawPanel.clear();
             position = 10;
-            for (int x = 0; x < 70; x++){
+            int inputtedRectangleNumber;
+
+            try{
+                inputtedRectangleNumber = Integer.parseInt(rectangleField.getText().trim());
+                if (inputtedRectangleNumber < 1 || inputtedRectangleNumber > 75) {
+                    inputtedRectangleNumber = 70;
+                    JOptionPane.showMessageDialog(null, "Please enter a number between 1 and 75");
+                }
+            }
+            catch (NumberFormatException ex){
+                JOptionPane.showMessageDialog(null, "Invalid number");
+                inputtedRectangleNumber = 70;
+            }
+
+            for (int x = 0; x < inputtedRectangleNumber; x++){
                 drawPanel.addRectangle(new MyRectangle(position, 575, (int)(Math.random()*500)+1));
                 position += 10;
             }
