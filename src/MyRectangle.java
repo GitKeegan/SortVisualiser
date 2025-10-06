@@ -19,12 +19,4 @@ public class MyRectangle extends JPanel {
     public int getX() {
         return x;
     }
-
-    public void paint(Graphics g){
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.drawRect(x, y, width, height);
-    }
-
-
-
 }

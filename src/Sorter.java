@@ -21,7 +21,6 @@ public class Sorter {
         this.visualiser = visualiser;
     }
 
-
     public void bubbleSort(){
         time = System.currentTimeMillis();
         visualiser.setSortingStatus(true);
